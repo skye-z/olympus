@@ -1,0 +1,116 @@
+package service
+
+import (
+	"embed"
+	"io/fs"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/gin-gonic/gin"
+	"github.com/skye-z/olympus/processor"
+	_ "modernc.org/sqlite"
+	"xorm.io/xorm"
+)
+
+func InitDB() *xorm.Engine {
+	log.Println("[Data] load engine")
+	engine, err := xorm.NewEngine("sqlite", "./local.store")
+	if err != nil {
+		panic(err)
+	}
+	return engine
+}
+
+func InitDBTable(engine *xorm.Engine) {
+	log.Println("[Data] load data")
+
+	log.Println("[Data] loading completed")
+}
+
+func InitRouter(page embed.FS) *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+	log.Println("[Core] load page")
+	pageFile, _ := fs.Sub(page, "page/dist")
+	router.StaticFS("/app", http.FS(pageFile))
+	return router
+}
+
+func InitRoute(router *gin.Engine, engine *xorm.Engine) {
+	// 公共路由
+	addPublicRoute(router, engine)
+
+	// 私有路由
+	addPrivateRoute(router, engine)
+
+	router.NoRoute(func(c *gin.Context) {
+		// 打印请求地址
+		log.Printf("[NR] URL: %s\n", c.Request.URL.Path)
+		c.Next()
+	})
+}
+
+func RunRouter(router *gin.Engine, engine *xorm.Engine) {
+	port := getPort()
+	log.Println("[Core] service started, port is", port)
+	// 启动服务
+	go func() {
+		if err := router.Run(":" + port); err != nil {
+			log.Fatalf("Error starting server: %v", err)
+		}
+	}()
+	// 等待中断信号以优雅关闭服务器
+	waitForInterrupt(engine)
+}
+
+func addPublicRoute(router *gin.Engine, engine *xorm.Engine) {
+	router.GET("/", func(ctx *gin.Context) {
+		ctx.Request.URL.Path = "/app"
+		router.HandleContext(ctx)
+	})
+	as := NewAuthService(engine)
+	if as != nil {
+		router.GET("/oauth2/bind", as.Bind)
+		router.GET("/oauth2/login", as.Login)
+		router.GET("/oauth2/callback", as.Callback)
+	}
+}
+
+func addPrivateRoute(router *gin.Engine, engine *xorm.Engine) {
+	// private := router.Group("").Use(AuthHandler())
+	// {
+	// private.GET("/api/device/info", ms.GetDeviceInfo)
+	// private.GET("/api/system/use", ms.GetUse)
+	// }
+	maven := processor.Maven{}
+	router.HEAD("/maven/*param", maven.GetFile)
+	router.GET("/maven/*param", maven.GetFile)
+
+	npm := processor.Npm{}
+	router.GET("/npm/*param", npm.GetFile)
+}
+
+// 等待关闭
+func waitForInterrupt(engine *xorm.Engine) {
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+
+	<-sigCh
+	log.Println("[Core] Shutting down server...")
+
+	defer engine.Close()
+
+	log.Println("[Core] Server gracefully stopped")
+}
+
+// 获取端口号配置
+func getPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "27680"
+	}
+	return port
+}

@@ -6,7 +6,9 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/skye-z/olympus/model"
 	"github.com/skye-z/olympus/util"
 )
 
@@ -16,6 +18,8 @@ const (
 
 type NpmStore struct {
 	RemoteURL string
+	Product   model.ProductModel
+	Version   model.VersionModel
 }
 
 // 获取文件
@@ -27,11 +31,11 @@ func (ns NpmStore) GetFile(path string) []byte {
 		fileName = path + ".json"
 		directory = path
 	} else {
-		fileName = path[strings.LastIndex(path, "/"):]
+		fileName = path[strings.LastIndex(path, "/")+1:]
 		directory = strings.ReplaceAll(path[:strings.LastIndex(path, "/")], "/-", "")
 	}
 
-	if util.CheckExist(npmRepository + strings.ReplaceAll(path, "/-", "")) {
+	if util.CheckExist(npmRepository + directory + "/" + fileName) {
 		return util.ReadFile(npmRepository + path)
 	} else {
 		content := ns.getRemoteData(path)
@@ -41,6 +45,7 @@ func (ns NpmStore) GetFile(path string) []byte {
 			return result
 		} else {
 			util.SaveFile(npmRepository+directory, fileName, content)
+			go ns.saveData(path)
 			return content
 		}
 	}
@@ -62,4 +67,48 @@ func (ns NpmStore) getRemoteData(path string) []byte {
 	}
 
 	return body
+}
+
+// 保存数据
+func (ns NpmStore) saveData(path string) {
+	params := strings.Split(path, "/")
+	name := ""
+	number := ""
+	length := len(params)
+	if length == 2 {
+		return
+	} else if length > 2 {
+		name = params[0]
+		cache := params[length-1]
+		cache = strings.Replace(cache, name+"-", "", -1)
+		number = cache[0:strings.LastIndex(cache, ".")]
+	}
+	// 查询制品信息是否存在
+	product := ns.Product.QueryProduct(1, "", name)
+	if product == nil || product.Id == 0 {
+		// 制品不存在 创建制品信息
+		product = &model.Product{
+			Processor: 2,
+			Group:     "",
+			Name:      name,
+			AddTime:   time.Now().Unix(),
+		}
+		ns.Product.AddProduct(product)
+	}
+	if product.Id > 0 {
+		// 查询制品版本是否存在
+		version := ns.Version.QueryVersion(product.Id, number)
+		if version == nil || version.Id == 0 {
+			// 版本不存在 创建版本信息
+			version = &model.Version{
+				PId:     product.Id,
+				Number:  number,
+				AddTime: time.Now().Unix(),
+			}
+			ns.Version.AddVersion(version)
+			// 更新制品
+			product.UpdateTime = time.Now().Unix()
+			ns.Product.EditProduct(product)
+		}
+	}
 }

@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/gin-gonic/gin"
+	"github.com/skye-z/olympus/model"
 	"github.com/skye-z/olympus/processor"
 	_ "modernc.org/sqlite"
 	"xorm.io/xorm"
@@ -26,8 +27,18 @@ func InitDB() *xorm.Engine {
 
 func InitDBTable(engine *xorm.Engine) {
 	log.Println("[Data] load data")
-
-	log.Println("[Data] loading completed")
+	err := engine.Sync2(new(model.User))
+	if err != nil {
+		panic(err)
+	}
+	err = engine.Sync2(new(model.Product))
+	if err != nil {
+		panic(err)
+	}
+	err = engine.Sync2(new(model.Version))
+	if err != nil {
+		panic(err)
+	}
 }
 
 func InitRouter(page embed.FS) *gin.Engine {
@@ -85,11 +96,25 @@ func addPrivateRoute(router *gin.Engine, engine *xorm.Engine) {
 	// private.GET("/api/device/info", ms.GetDeviceInfo)
 	// private.GET("/api/system/use", ms.GetUse)
 	// }
-	maven := processor.Maven{}
+
+	product := model.ProductModel{
+		DB: engine,
+	}
+	version := model.VersionModel{
+		DB: engine,
+	}
+
+	maven := processor.Maven{
+		Product: product,
+		Version: version,
+	}
 	router.HEAD("/maven/*param", maven.GetFile)
 	router.GET("/maven/*param", maven.GetFile)
 
-	npm := processor.Npm{}
+	npm := processor.Npm{
+		Product: product,
+		Version: version,
+	}
 	router.GET("/npm/*param", npm.GetFile)
 }
 
@@ -99,11 +124,11 @@ func waitForInterrupt(engine *xorm.Engine) {
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 
 	<-sigCh
-	log.Println("[Core] Shutting down server...")
+	log.Println("[Core] shutting down server")
 
 	defer engine.Close()
 
-	log.Println("[Core] Server gracefully stopped")
+	log.Println("[Core] server stopped")
 }
 
 // 获取端口号配置

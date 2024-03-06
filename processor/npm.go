@@ -6,10 +6,13 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/skye-z/olympus/model"
 	"github.com/skye-z/olympus/store"
 )
 
 type Npm struct {
+	Product model.ProductModel
+	Version model.VersionModel
 }
 
 func (n Npm) GetFile(ctx *gin.Context) {
@@ -17,6 +20,8 @@ func (n Npm) GetFile(ctx *gin.Context) {
 
 	ms := store.NpmStore{
 		RemoteURL: "https://registry.npmjs.org/",
+		Product:   n.Product,
+		Version:   n.Version,
 	}
 
 	ext := filepath.Ext(param)

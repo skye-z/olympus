@@ -1,12 +1,12 @@
-# Olympus - 私有制品仓库
+# Olympus - 私有制品中转仓
 
-Olympus 是一个支持多种包管理器的私有制品仓库, 提供中央仓库代理加速与私有制品分发服务.
+Olympus 是一个支持多种包管理器的私有制品中转仓库, 提供中央仓库代理加速与私有制品分发服务.
 
 ## 支持列表
 
-* Docker Registry
 * Maven Registry
 * NPM Registry
+* Docker Registry
 
 ## 功能
 

@@ -4,5 +4,3 @@ config.ini
 local.store
 /repository
 /out
-# page
-page/

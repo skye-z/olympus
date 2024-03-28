@@ -35,6 +35,10 @@ func (ns NpmStore) GetFile(path string) []byte {
 		fileName = path[strings.LastIndex(path, "/")+1:]
 		directory = strings.ReplaceAll(path[:strings.LastIndex(path, "/")], "/-", "")
 	}
+	// 无后缀文件统一标为JSON
+	if !strings.Contains(fileName, ".") {
+		fileName = fileName + ".json"
+	}
 
 	if util.CheckExist(npmRepository + directory + "/" + fileName) {
 		log.Println("[Store] get npm file from cache: " + npmRepository + directory + "/" + fileName)
@@ -52,6 +56,24 @@ func (ns NpmStore) GetFile(path string) []byte {
 			return content
 		}
 	}
+}
+
+// 获取远程数据
+func (ns NpmStore) GetSecurityFile(path, contentType string, body io.ReadCloser) []byte {
+	resp, err := http.Post(ns.RemoteURL+path, contentType, body)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil
+	}
+	defer resp.Body.Close()
+
+	res, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response:", err)
+		return nil
+	}
+
+	return res
 }
 
 // 获取远程数据

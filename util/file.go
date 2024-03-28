@@ -39,5 +39,8 @@ func ReadFile(path string) []byte {
 // 检查是否存在
 func CheckExist(path string) bool {
 	_, err := os.Stat(path)
-	return !os.IsNotExist(err) || err == nil
+	if os.IsNotExist(err) || os.IsPermission(err) {
+		return false
+	}
+	return err == nil
 }

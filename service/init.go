@@ -115,6 +115,7 @@ func addPrivateRoute(router *gin.Engine, engine *xorm.Engine) {
 		Product: product,
 		Version: version,
 	}
+	router.POST("/npm/*param", npm.GetFile)
 	router.GET("/npm/*param", npm.GetFile)
 }
 

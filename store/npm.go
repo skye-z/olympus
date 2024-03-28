@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -36,8 +37,10 @@ func (ns NpmStore) GetFile(path string) []byte {
 	}
 
 	if util.CheckExist(npmRepository + directory + "/" + fileName) {
-		return util.ReadFile(npmRepository + path)
+		log.Println("[Store] get npm file from cache: " + npmRepository + directory + "/" + fileName)
+		return util.ReadFile(npmRepository + directory + "/" + fileName)
 	} else {
+		log.Println("[Store] get npm file from online: " + path)
 		content := ns.getRemoteData(path)
 		if index == -1 {
 			result := bytes.Replace(content, []byte("https://registry.npmjs.org/"), []byte("http://localhost:27680/npm/"), -1)

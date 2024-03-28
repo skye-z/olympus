@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -26,8 +27,10 @@ func (ms MavenStore) GetFile(path string) []byte {
 	fileName := path[strings.LastIndex(path, "/")+1:]
 	directory := path[:strings.LastIndex(path, "/")]
 	if util.CheckExist(mavenRepository + path) {
+		log.Println("[Store] get maven file from cache: " + npmRepository + directory + "/" + fileName)
 		return util.ReadFile(mavenRepository + path)
 	} else {
+		log.Println("[Store] get maven file from online: " + path)
 		content := ms.getRemoteData(path)
 		util.SaveFile(mavenRepository+directory, fileName, content)
 		go ms.saveData(directory, fileName)

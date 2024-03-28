@@ -71,7 +71,7 @@ func (ms MavenStore) saveData(path, fileName string) {
 	}
 	group := strings.Join(params[:len(params)-2], ".")
 	// 查询制品信息是否存在
-	product := ms.Product.QueryProduct(1, group, name)
+	product := ms.Product.GetProduct(1, group, name)
 	if product == nil || product.Id == 0 {
 		// 制品不存在 创建制品信息
 		product = &model.Product{

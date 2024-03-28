@@ -109,7 +109,7 @@ func (ns NpmStore) saveData(path string) {
 		number = cache[0:strings.LastIndex(cache, ".")]
 	}
 	// 查询制品信息是否存在
-	product := ns.Product.QueryProduct(2, "", name)
+	product := ns.Product.GetProduct(2, "", name)
 	if product == nil || product.Id == 0 {
 		// 制品不存在 创建制品信息
 		product = &model.Product{

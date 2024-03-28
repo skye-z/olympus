@@ -1,6 +1,8 @@
 package model
 
-import "xorm.io/xorm"
+import (
+	"xorm.io/xorm"
+)
 
 type Product struct {
 	Id int64 `json:"id"`
@@ -41,7 +43,7 @@ func (model ProductModel) DelProduct(product *Product) bool {
 	return err == nil
 }
 
-func (model ProductModel) QueryProduct(processor int16, group, name string) *Product {
+func (model ProductModel) GetProduct(processor int16, group, name string) *Product {
 	product := &Product{
 		Processor: processor,
 		Group:     group,
@@ -50,6 +52,52 @@ func (model ProductModel) QueryProduct(processor int16, group, name string) *Pro
 	has, _ := model.DB.Get(product)
 	if !has {
 		return product
+	}
+	return nil
+}
+
+func (model ProductModel) GetList(processor int, group, name string, page int, num int) ([]Product, error) {
+	var list []Product
+	var cache *xorm.Session
+	if processor > 0 {
+		cache = model.DB.Where("processor = ?", processor)
+	}
+	if len(group) > 0 {
+		cache = model.DB.Where("group = ?", group)
+	}
+	if len(name) > 0 {
+		cache = model.DB.Where("name LIKE ?", name)
+	}
+	err := cache.Limit(page*num, (page-1)*num).Find(&list)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+func (model ProductModel) GetNumber(processor int, group, name string) (int64, error) {
+	var product Product
+	var cache *xorm.Session
+	if processor > 0 {
+		cache = model.DB.Where("processor = ?", processor)
+	}
+	if len(group) > 0 {
+		cache = model.DB.Where("group = ?", group)
+	}
+	if len(name) > 0 {
+		cache = model.DB.Where("name LIKE ?", name)
+	}
+	number, err := cache.Count(product)
+	if err != nil {
+		return 0, err
+	}
+	return number, nil
+}
+
+func (model ProductModel) Stat() []map[string]interface{} {
+	data, err := model.DB.QueryInterface("SELECT processor, COUNT( 1 ) AS `number` FROM product GROUP BY processor")
+	if err == nil {
+		return data
 	}
 	return nil
 }

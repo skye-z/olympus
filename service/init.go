@@ -2,6 +2,7 @@ package service
 
 import (
 	"embed"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -43,6 +44,7 @@ func InitDBTable(engine *xorm.Engine) {
 
 func InitRouter(page embed.FS) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
+	gin.DefaultWriter = io.Discard
 	router := gin.Default()
 	log.Println("[Core] load page")
 	pageFile, _ := fs.Sub(page, "page/dist")
@@ -82,12 +84,40 @@ func addPublicRoute(router *gin.Engine, engine *xorm.Engine) {
 		ctx.Request.URL.Path = "/app"
 		router.HandleContext(ctx)
 	})
+	// OAuth2登录路由
 	as := NewAuthService(engine)
 	if as != nil {
 		router.GET("/oauth2/bind", as.Bind)
 		router.GET("/oauth2/login", as.Login)
 		router.GET("/oauth2/callback", as.Callback)
 	}
+	product := model.ProductModel{
+		DB: engine,
+	}
+	version := model.VersionModel{
+		DB: engine,
+	}
+	// 制品路由
+	ps := NewProductService(product, version)
+	router.GET("/product/stat", ps.Stat)
+	router.GET("/product/search", ps.Search)
+	router.GET("/product/number", ps.GetNumber)
+	router.GET("/product/list", ps.GetList)
+	router.GET("/product/info/:id", ps.GetInfo)
+	// Maven处理路由
+	maven := processor.Maven{
+		Product: product,
+		Version: version,
+	}
+	router.HEAD("/maven/*param", maven.GetFile)
+	router.GET("/maven/*param", maven.GetFile)
+	// NPM处理路由
+	npm := processor.Npm{
+		Product: product,
+		Version: version,
+	}
+	router.POST("/npm/*param", npm.GetFile)
+	router.GET("/npm/*param", npm.GetFile)
 }
 
 func addPrivateRoute(router *gin.Engine, engine *xorm.Engine) {
@@ -96,27 +126,6 @@ func addPrivateRoute(router *gin.Engine, engine *xorm.Engine) {
 	// private.GET("/api/device/info", ms.GetDeviceInfo)
 	// private.GET("/api/system/use", ms.GetUse)
 	// }
-
-	product := model.ProductModel{
-		DB: engine,
-	}
-	version := model.VersionModel{
-		DB: engine,
-	}
-
-	maven := processor.Maven{
-		Product: product,
-		Version: version,
-	}
-	router.HEAD("/maven/*param", maven.GetFile)
-	router.GET("/maven/*param", maven.GetFile)
-
-	npm := processor.Npm{
-		Product: product,
-		Version: version,
-	}
-	router.POST("/npm/*param", npm.GetFile)
-	router.GET("/npm/*param", npm.GetFile)
 }
 
 // 等待关闭

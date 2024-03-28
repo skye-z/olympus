@@ -41,10 +41,10 @@ func (ns NpmStore) GetFile(path string) []byte {
 	}
 
 	if util.CheckExist(npmRepository + directory + "/" + fileName) {
-		log.Println("[Store] get npm file from cache: " + npmRepository + directory + "/" + fileName)
+		log.Println("[Store] npm from cache: " + npmRepository + directory + "/" + fileName)
 		return util.ReadFile(npmRepository + directory + "/" + fileName)
 	} else {
-		log.Println("[Store] get npm file from online: " + path)
+		log.Println("[Store] npm from online: " + path)
 		content := ns.getRemoteData(path)
 		if index == -1 {
 			result := bytes.Replace(content, []byte("https://registry.npmjs.org/"), []byte("http://localhost:27680/npm/"), -1)
@@ -109,7 +109,7 @@ func (ns NpmStore) saveData(path string) {
 		number = cache[0:strings.LastIndex(cache, ".")]
 	}
 	// 查询制品信息是否存在
-	product := ns.Product.QueryProduct(1, "", name)
+	product := ns.Product.QueryProduct(2, "", name)
 	if product == nil || product.Id == 0 {
 		// 制品不存在 创建制品信息
 		product = &model.Product{

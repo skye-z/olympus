@@ -22,12 +22,12 @@ type ProductModel struct {
 	DB *xorm.Engine
 }
 
-func (model ProductModel) AddProduct(product *Product) bool {
+func (model ProductModel) Add(product *Product) bool {
 	_, err := model.DB.Insert(product)
 	return err == nil
 }
 
-func (model ProductModel) EditProduct(product *Product) bool {
+func (model ProductModel) Edit(product *Product) bool {
 	if product.Id == 0 {
 		return false
 	}
@@ -35,7 +35,7 @@ func (model ProductModel) EditProduct(product *Product) bool {
 	return err == nil
 }
 
-func (model ProductModel) DelProduct(product *Product) bool {
+func (model ProductModel) Del(product *Product) bool {
 	if product.Id == 0 {
 		return false
 	}
@@ -43,7 +43,18 @@ func (model ProductModel) DelProduct(product *Product) bool {
 	return err == nil
 }
 
-func (model ProductModel) GetProduct(processor int16, group, name string) *Product {
+func (model ProductModel) GetItem(id int64) *Product {
+	product := &Product{
+		Id: id,
+	}
+	has, _ := model.DB.Get(product)
+	if !has {
+		return product
+	}
+	return nil
+}
+
+func (model ProductModel) Query(processor int16, group, name string) *Product {
 	product := &Product{
 		Processor: processor,
 		Group:     group,
@@ -59,14 +70,14 @@ func (model ProductModel) GetProduct(processor int16, group, name string) *Produ
 func (model ProductModel) GetList(processor int, group, name string, page int, num int) ([]Product, error) {
 	var list []Product
 	var cache *xorm.Session
-	if processor > 0 {
-		cache = model.DB.Where("processor = ?", processor)
-	}
-	if len(group) > 0 {
-		cache = model.DB.Where("group = ?", group)
-	}
 	if len(name) > 0 {
 		cache = model.DB.Where("name LIKE ?", name)
+	}
+	if processor > 0 {
+		cache = cache.Where("processor = ?", processor)
+	}
+	if len(group) > 0 {
+		cache = cache.Where("group = ?", group)
 	}
 	err := cache.Limit(page*num, (page-1)*num).Find(&list)
 	if err != nil {
@@ -78,14 +89,14 @@ func (model ProductModel) GetList(processor int, group, name string, page int, n
 func (model ProductModel) GetNumber(processor int, group, name string) (int64, error) {
 	var product Product
 	var cache *xorm.Session
-	if processor > 0 {
-		cache = model.DB.Where("processor = ?", processor)
-	}
-	if len(group) > 0 {
-		cache = model.DB.Where("group = ?", group)
-	}
 	if len(name) > 0 {
 		cache = model.DB.Where("name LIKE ?", name)
+	}
+	if processor > 0 {
+		cache = cache.Where("processor = ?", processor)
+	}
+	if len(group) > 0 {
+		cache = cache.Where("group = ?", group)
 	}
 	number, err := cache.Count(product)
 	if err != nil {

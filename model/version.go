@@ -16,12 +16,12 @@ type VersionModel struct {
 	DB *xorm.Engine
 }
 
-func (model VersionModel) AddVersion(version *Version) bool {
+func (model VersionModel) Add(version *Version) bool {
 	_, err := model.DB.Insert(version)
 	return err == nil
 }
 
-func (model VersionModel) EditVersion(version *Version) bool {
+func (model VersionModel) Edit(version *Version) bool {
 	if version.Id == 0 {
 		return false
 	}
@@ -29,7 +29,7 @@ func (model VersionModel) EditVersion(version *Version) bool {
 	return err == nil
 }
 
-func (model VersionModel) DelVersion(version *Version) bool {
+func (model VersionModel) Del(version *Version) bool {
 	if version.Id == 0 {
 		return false
 	}
@@ -37,7 +37,16 @@ func (model VersionModel) DelVersion(version *Version) bool {
 	return err == nil
 }
 
-func (model VersionModel) QueryVersion(pid int64, number string) *Version {
+func (model VersionModel) GetList(pid int64, page, num int) ([]Version, error) {
+	var list []Version
+	err := model.DB.Where("pid = ?", pid).Limit(page*num, (page-1)*num).Find(&list)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+func (model VersionModel) Query(pid int64, number string) *Version {
 	version := &Version{
 		PId:    pid,
 		Number: number,

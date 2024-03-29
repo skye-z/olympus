@@ -103,7 +103,29 @@ func (ps ProductService) GetList(ctx *gin.Context) {
 	}
 }
 
+type ProductInfo struct {
+	Info    *model.Product  `json:"info"`
+	Version []model.Version `json:"version"`
+}
+
 // 获取制品详情
 func (ps ProductService) GetInfo(ctx *gin.Context) {
-
+	id, _ := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	product := ps.Product.GetItem(id)
+	if product == nil {
+		util.ReturnMessage(ctx, false, "制品不存在")
+	}
+	page, err := strconv.Atoi(ctx.Query("page"))
+	if err != nil {
+		page = 1
+	}
+	number, err := strconv.Atoi(ctx.Query("number"))
+	if err != nil {
+		number = 20
+	}
+	list, _ := ps.Version.GetList(id, page, number)
+	util.ReturnData(ctx, true, &ProductInfo{
+		Info:    product,
+		Version: list,
+	})
 }

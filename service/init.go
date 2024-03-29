@@ -99,11 +99,11 @@ func addPublicRoute(router *gin.Engine, engine *xorm.Engine) {
 	}
 	// 制品路由
 	ps := NewProductService(product, version)
-	router.GET("/product/stat", ps.Stat)
-	router.GET("/product/search", ps.Search)
-	router.GET("/product/number", ps.GetNumber)
-	router.GET("/product/list", ps.GetList)
-	router.GET("/product/info/:id", ps.GetInfo)
+	router.GET("/api/product/stat", ps.Stat)
+	router.GET("/api/product/search", ps.Search)
+	router.GET("/api/product/number", ps.GetNumber)
+	router.GET("/api/product/list", ps.GetList)
+	router.GET("/api/product/info/:id", ps.GetInfo)
 	// Maven处理路由
 	maven := processor.Maven{
 		Product: product,

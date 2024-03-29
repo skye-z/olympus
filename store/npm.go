@@ -109,7 +109,7 @@ func (ns NpmStore) saveData(path string) {
 		number = cache[0:strings.LastIndex(cache, ".")]
 	}
 	// 查询制品信息是否存在
-	product := ns.Product.GetProduct(2, "", name)
+	product := ns.Product.Query(2, "", name)
 	if product == nil || product.Id == 0 {
 		// 制品不存在 创建制品信息
 		product = &model.Product{
@@ -118,11 +118,11 @@ func (ns NpmStore) saveData(path string) {
 			Name:      name,
 			AddTime:   time.Now().Unix(),
 		}
-		ns.Product.AddProduct(product)
+		ns.Product.Add(product)
 	}
 	if product.Id > 0 {
 		// 查询制品版本是否存在
-		version := ns.Version.QueryVersion(product.Id, number)
+		version := ns.Version.Query(product.Id, number)
 		if version == nil || version.Id == 0 {
 			// 版本不存在 创建版本信息
 			version = &model.Version{
@@ -130,10 +130,10 @@ func (ns NpmStore) saveData(path string) {
 				Number:  number,
 				AddTime: time.Now().Unix(),
 			}
-			ns.Version.AddVersion(version)
+			ns.Version.Add(version)
 			// 更新制品
 			product.UpdateTime = time.Now().Unix()
-			ns.Product.EditProduct(product)
+			ns.Product.Edit(product)
 		}
 	}
 }

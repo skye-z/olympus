@@ -71,7 +71,7 @@ func (ms MavenStore) saveData(path, fileName string) {
 	}
 	group := strings.Join(params[:len(params)-2], ".")
 	// 查询制品信息是否存在
-	product := ms.Product.GetProduct(1, group, name)
+	product := ms.Product.Query(1, group, name)
 	if product == nil || product.Id == 0 {
 		// 制品不存在 创建制品信息
 		product = &model.Product{
@@ -80,11 +80,11 @@ func (ms MavenStore) saveData(path, fileName string) {
 			Name:      name,
 			AddTime:   time.Now().Unix(),
 		}
-		ms.Product.AddProduct(product)
+		ms.Product.Add(product)
 	}
 	if product.Id > 0 {
 		// 查询制品版本是否存在
-		version := ms.Version.QueryVersion(product.Id, number)
+		version := ms.Version.Query(product.Id, number)
 		if version == nil || version.Id == 0 {
 			// 版本不存在 创建版本信息
 			version = &model.Version{
@@ -92,10 +92,10 @@ func (ms MavenStore) saveData(path, fileName string) {
 				Number:  number,
 				AddTime: time.Now().Unix(),
 			}
-			ms.Version.AddVersion(version)
+			ms.Version.Add(version)
 			// 更新制品
 			product.UpdateTime = time.Now().Unix()
-			ms.Product.EditProduct(product)
+			ms.Product.Edit(product)
 		}
 	}
 }

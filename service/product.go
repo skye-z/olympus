@@ -135,3 +135,14 @@ func (ps ProductService) GetNpmConfig(ctx *gin.Context) {
 	ctx.Data(200, "application/json; charset=utf-8", data)
 	ctx.Abort()
 }
+
+// 获取版本列表
+func (ps ProductService) GetVersionList(ctx *gin.Context) {
+	id, _ := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	list, err := ps.Version.GetList(id)
+	if err != nil {
+		util.ReturnMessage(ctx, false, "获取版本列表失败")
+		return
+	}
+	util.ReturnData(ctx, true, list)
+}

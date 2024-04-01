@@ -1,6 +1,8 @@
 package model
 
-import "xorm.io/xorm"
+import (
+	"xorm.io/xorm"
+)
 
 type Version struct {
 	Id int64 `json:"id"`
@@ -37,9 +39,9 @@ func (model VersionModel) Del(version *Version) bool {
 	return err == nil
 }
 
-func (model VersionModel) GetList(pid int64, page, num int) ([]Version, error) {
+func (model VersionModel) GetList(pid int64) ([]Version, error) {
 	var list []Version
-	err := model.DB.Where("pid = ?", pid).Limit(page*num, (page-1)*num).Find(&list)
+	err := model.DB.Where("p_id = ?", pid).Find(&list)
 	if err != nil {
 		return nil, err
 	}

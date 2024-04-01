@@ -1,6 +1,8 @@
 package model
 
 import (
+	"log"
+
 	"xorm.io/xorm"
 )
 
@@ -16,6 +18,11 @@ type Product struct {
 	AddTime int64 `json:"addTime"`
 	// 更新时间
 	UpdateTime int64 `json:"updateTime"`
+}
+
+type ProductWithVersion struct {
+	Product       `xorm:"extends"`
+	LatestVersion string `json:"lastVersion" xorm:"'number'"`
 }
 
 type ProductModel struct {
@@ -67,20 +74,24 @@ func (model ProductModel) Query(processor int16, group, name string) *Product {
 	return nil
 }
 
-func (model ProductModel) GetList(processor int, group, name string, page int, num int) ([]Product, error) {
-	var list []Product
+func (model ProductModel) GetList(processor int, group, name string, page int, num int) ([]ProductWithVersion, error) {
+	var list []ProductWithVersion
 	var cache *xorm.Session
+	cache = model.DB.Table("product").
+		Join("LEFT", "version", "product.id = version.p_id").
+		Select("product.*, version.number")
 	if len(name) > 0 {
-		cache = model.DB.Where("name LIKE ?", name)
+		cache = cache.Where("product.name LIKE ?", name)
 	}
 	if processor > 0 {
-		cache = cache.Where("processor = ?", processor)
+		cache = cache.Where("product.processor = ?", processor)
 	}
 	if len(group) > 0 {
-		cache = cache.Where("group = ?", group)
+		cache = cache.Where("product.group = ?", group)
 	}
-	err := cache.Limit(page*num, (page-1)*num).Find(&list)
+	err := cache.Desc("product.add_time").Limit(page*num, (page-1)*num).Find(&list)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	return list, nil

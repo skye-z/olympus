@@ -7,7 +7,7 @@ type Version struct {
 	// 制品编号
 	PId int64 `json:"pid"`
 	// 版本号
-	Number string `json:"name"`
+	Number string `json:"number"`
 	// 添加时间
 	AddTime int64 `json:"addTime"`
 }

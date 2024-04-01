@@ -13,6 +13,8 @@ import (
 	"github.com/skye-z/olympus/util"
 )
 
+const NpmRemoteURL = "https://registry.npmjs.org/"
+
 type Npm struct {
 	Product model.ProductModel
 	Version model.VersionModel
@@ -23,7 +25,7 @@ func (n Npm) GetFile(ctx *gin.Context) {
 	param := ctx.Param("param")
 
 	ms := store.NpmStore{
-		RemoteURL: "https://registry.npmjs.org/",
+		RemoteURL: NpmRemoteURL,
 		Product:   n.Product,
 		Version:   n.Version,
 	}
@@ -47,4 +49,13 @@ func (n Npm) GetFile(ctx *gin.Context) {
 		ctx.Data(200, mimeType, ms.GetFile(param[1:]))
 		ctx.Abort()
 	}
+}
+
+func (n Npm) GetConfig(name string) []byte {
+	ms := store.NpmStore{
+		RemoteURL: NpmRemoteURL,
+		Product:   n.Product,
+		Version:   n.Version,
+	}
+	return ms.GetFile(name)
 }

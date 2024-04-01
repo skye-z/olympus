@@ -55,7 +55,7 @@ func (model ProductModel) GetItem(id int64) *Product {
 		Id: id,
 	}
 	has, _ := model.DB.Get(product)
-	if !has {
+	if has {
 		return product
 	}
 	return nil
@@ -68,7 +68,7 @@ func (model ProductModel) Query(processor int16, group, name string) *Product {
 		Name:      name,
 	}
 	has, _ := model.DB.Get(product)
-	if !has {
+	if has {
 		return product
 	}
 	return nil

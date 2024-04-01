@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/skye-z/olympus/model"
+	"github.com/skye-z/olympus/processor"
 	"github.com/skye-z/olympus/util"
 )
 
@@ -114,18 +115,23 @@ func (ps ProductService) GetInfo(ctx *gin.Context) {
 	product := ps.Product.GetItem(id)
 	if product == nil {
 		util.ReturnMessage(ctx, false, "制品不存在")
+		return
 	}
-	page, err := strconv.Atoi(ctx.Query("page"))
-	if err != nil {
-		page = 1
+	util.ReturnData(ctx, true, product)
+}
+
+// 获取制品详情
+func (ps ProductService) GetNpmConfig(ctx *gin.Context) {
+	name := ctx.Param("name")
+	npmPro := &processor.Npm{
+		Product: ps.Product,
+		Version: ps.Version,
 	}
-	number, err := strconv.Atoi(ctx.Query("number"))
-	if err != nil {
-		number = 20
+	data := npmPro.GetConfig(name)
+	if data == nil {
+		util.ReturnMessage(ctx, false, "制品不存在")
+		return
 	}
-	list, _ := ps.Version.GetList(id, page, number)
-	util.ReturnData(ctx, true, &ProductInfo{
-		Info:    product,
-		Version: list,
-	})
+	ctx.Data(200, "application/json; charset=utf-8", data)
+	ctx.Abort()
 }

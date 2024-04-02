@@ -106,6 +106,8 @@ func addPublicRoute(router *gin.Engine, engine *xorm.Engine) {
 	router.GET("/api/product/info/:id", ps.GetInfo)
 	router.GET("/api/product/version/:id", ps.GetVersionList)
 	router.GET("/api/product/npm/:name", ps.GetNpmConfig)
+	router.GET("/api/product/maven/:group/:name", ps.GetMavenConfig)
+	router.GET("/api/product/maven/:group/:name/:version", ps.GetMavenConfig)
 	// Maven处理路由
 	maven := processor.Maven{
 		Product: product,

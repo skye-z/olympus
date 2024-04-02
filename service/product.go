@@ -120,7 +120,7 @@ func (ps ProductService) GetInfo(ctx *gin.Context) {
 	util.ReturnData(ctx, true, product)
 }
 
-// 获取制品详情
+// 获取NPM制品详情
 func (ps ProductService) GetNpmConfig(ctx *gin.Context) {
 	name := ctx.Param("name")
 	npmPro := &processor.Npm{
@@ -133,6 +133,24 @@ func (ps ProductService) GetNpmConfig(ctx *gin.Context) {
 		return
 	}
 	ctx.Data(200, "application/json; charset=utf-8", data)
+	ctx.Abort()
+}
+
+// 获取Maven制品详情
+func (ps ProductService) GetMavenConfig(ctx *gin.Context) {
+	name := ctx.Param("name")
+	group := ctx.Param("group")
+	version := ctx.Param("version")
+	mavenPro := &processor.Maven{
+		Product: ps.Product,
+		Version: ps.Version,
+	}
+	data := mavenPro.GetConfig(group, name, version)
+	if data == nil {
+		util.ReturnMessage(ctx, false, "制品不存在")
+		return
+	}
+	ctx.Data(200, "application/xml; charset=utf-8", data)
 	ctx.Abort()
 }
 

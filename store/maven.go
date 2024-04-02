@@ -32,7 +32,9 @@ func (ms MavenStore) GetFile(path string) []byte {
 	} else {
 		log.Println("[Store] maven from online: " + path)
 		content := ms.getRemoteData(path)
-		util.SaveFile(mavenRepository+directory, fileName, content)
+		if content != nil {
+			util.SaveFile(mavenRepository+directory, fileName, content)
+		}
 		go ms.saveData(directory, fileName)
 		return content
 	}
@@ -46,6 +48,10 @@ func (ms MavenStore) getRemoteData(path string) []byte {
 		return nil
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

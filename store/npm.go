@@ -46,6 +46,9 @@ func (ns NpmStore) GetFile(path string) []byte {
 	} else {
 		log.Println("[Store] npm from online: " + path)
 		content := ns.getRemoteData(path)
+		if content == nil {
+			return nil
+		}
 		if index == -1 {
 			result := bytes.Replace(content, []byte("https://registry.npmjs.org/"), []byte("http://localhost:27680/npm/"), -1)
 			util.SaveFile(npmRepository+directory, fileName, result)
@@ -84,6 +87,10 @@ func (ns NpmStore) getRemoteData(path string) []byte {
 		return nil
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

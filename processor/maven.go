@@ -21,7 +21,7 @@ func (m Maven) GetFile(ctx *gin.Context) {
 	param := ctx.Param("param")
 
 	ms := store.MavenStore{
-		RemoteURL: "https://repo1.maven.org/maven2/",
+		RemoteURL: MavenRemoteURL,
 		Product:   m.Product,
 		Version:   m.Version,
 	}
@@ -40,7 +40,7 @@ func (m Maven) GetFile(ctx *gin.Context) {
 
 func (m Maven) GetConfig(group, name, version string) []byte {
 	ms := store.MavenStore{
-		RemoteURL: "https://repo1.maven.org/maven2/",
+		RemoteURL: MavenRemoteURL,
 		Product:   m.Product,
 		Version:   m.Version,
 	}

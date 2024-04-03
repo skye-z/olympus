@@ -6,7 +6,7 @@ Olympus 是一个支持多种包管理器的私有制品中转仓库, 提供中�
 
 * Maven Registry
 * NPM Registry
-* Docker Registry
+* Go Registry
 
 ## 功能
 

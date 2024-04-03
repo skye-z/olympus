@@ -122,6 +122,12 @@ func addPublicRoute(router *gin.Engine, engine *xorm.Engine) {
 	}
 	router.POST("/npm/*param", npm.GetFile)
 	router.GET("/npm/*param", npm.GetFile)
+	// Go处理路由
+	goModule := processor.GoModule{
+		Product: product,
+		Version: version,
+	}
+	router.GET("/go/*param", goModule.GetFile)
 }
 
 func addPrivateRoute(router *gin.Engine, engine *xorm.Engine) {

@@ -23,18 +23,27 @@ type GoStore struct {
 }
 
 // 获取文件
-func (gs GoStore) GetFile(path string) []byte {
+func (gs GoStore) GetFile(path, mimeType string) []byte {
 	params := strings.Split(path, "/")
-	if strings.Contains(path, "/@v/") {
-		group := params[0]
-		if len(params) > 4 {
-			group = group + "/" + params[1]
-		}
-		name := params[len(params)-3]
-		version := params[len(params)-1]
-		version = strings.ReplaceAll(version[1:], ".zip", "")
+	group := params[0]
+	if len(params) > 4 {
+		group = group + "/" + params[1]
+	}
+	name := params[len(params)-3]
 
-		filePath := goRepository + group + "/" + name + "/" + version + ".zip"
+	if strings.Contains(path, "/@v/") {
+		version := params[len(params)-1]
+		if version[0:1] == "v" {
+			version = version[1:]
+		}
+		version = strings.ReplaceAll(version, ".zip", "")
+
+		extend := ""
+		if mimeType == "application/zip" {
+			extend = ".zip"
+		}
+
+		filePath := goRepository + group + "/" + name + "/" + version + extend
 		if util.CheckExist(filePath) {
 			log.Println("[Store] go from cache: " + filePath)
 			return util.ReadFile(filePath)
@@ -42,15 +51,25 @@ func (gs GoStore) GetFile(path string) []byte {
 			log.Println("[Store] go from online: " + path)
 			content := gs.getRemoteData(path)
 			if content != nil {
-				util.SaveFile(goRepository+group+"/"+name, version+".zip", content)
+				util.SaveFile(goRepository+group+"/"+name, version+extend, content)
 			}
 			go gs.saveData(group, name, version)
 			return content
 		}
 	} else {
-
+		filePath := goRepository + group + "/" + name + "/lastest.json"
+		if util.CheckExist(filePath) {
+			log.Println("[Store] go from cache: " + filePath)
+			return util.ReadFile(filePath)
+		} else {
+			log.Println("[Store] go from online: " + path)
+			content := gs.getRemoteData(path)
+			if content != nil {
+				util.SaveFile(goRepository+group+"/"+name, "lastest.json", content)
+			}
+			return content
+		}
 	}
-	return nil
 }
 
 // 获取远程数据

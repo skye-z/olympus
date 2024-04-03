@@ -154,6 +154,23 @@ func (ps ProductService) GetMavenConfig(ctx *gin.Context) {
 	ctx.Abort()
 }
 
+// 获取Go制品详情
+func (ps ProductService) GetGoConfig(ctx *gin.Context) {
+	name := ctx.Param("name")
+	group := ctx.Param("group")
+	goPro := &processor.GoModule{
+		Product: ps.Product,
+		Version: ps.Version,
+	}
+	data := goPro.GetConfig(group, name)
+	if data == nil {
+		util.ReturnMessage(ctx, false, "制品不存在")
+		return
+	}
+	ctx.Data(200, "application/json; charset=utf-8", data)
+	ctx.Abort()
+}
+
 // 获取版本列表
 func (ps ProductService) GetVersionList(ctx *gin.Context) {
 	id, _ := strconv.ParseInt(ctx.Param("id"), 10, 64)

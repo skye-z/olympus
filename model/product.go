@@ -79,7 +79,8 @@ func (model ProductModel) GetList(processor int, group, name string, page int, n
 	var cache *xorm.Session
 	cache = model.DB.Table("product").
 		Join("LEFT", "version", "product.id = version.p_id").
-		Select("product.*, version.number")
+		GroupBy("product.id").
+		Select("product.*, MAX(version.number) as `number`")
 	if len(name) > 0 {
 		cache = cache.Where("product.name LIKE ?", name)
 	}

@@ -53,7 +53,9 @@ func (gs GoStore) GetFile(path, mimeType string) []byte {
 			if content != nil {
 				util.SaveFile(goRepository+group+"/"+name, version+extend, content)
 			}
-			go gs.saveData(group, name, version)
+			if name != "list" {
+				go gs.saveData(group, name, version)
+			}
 			return content
 		}
 	} else {

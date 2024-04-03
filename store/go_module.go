@@ -29,9 +29,9 @@ func (gs GoStore) GetFile(path, mimeType string) []byte {
 	if len(params) > 4 {
 		group = group + "/" + params[1]
 	}
-	name := params[len(params)-3]
 
 	if strings.Contains(path, "/@v/") {
+		name := params[len(params)-3]
 		version := params[len(params)-1]
 		if version[0:1] == "v" {
 			version = version[1:]
@@ -57,6 +57,7 @@ func (gs GoStore) GetFile(path, mimeType string) []byte {
 			return content
 		}
 	} else {
+		name := params[len(params)-2]
 		filePath := goRepository + group + "/" + name + "/lastest.json"
 		if util.CheckExist(filePath) {
 			log.Println("[Store] go from cache: " + filePath)

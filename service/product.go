@@ -2,6 +2,7 @@ package service
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/skye-z/olympus/model"
@@ -162,6 +163,7 @@ func (ps ProductService) GetGoConfig(ctx *gin.Context) {
 		Product: ps.Product,
 		Version: ps.Version,
 	}
+	group = strings.ReplaceAll(group, "@", "/")
 	data := goPro.GetConfig(group, name)
 	if data == nil {
 		util.ReturnMessage(ctx, false, "制品不存在")

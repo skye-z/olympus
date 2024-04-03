@@ -38,5 +38,5 @@ func (g GoModule) GetConfig(group, name string) []byte {
 		Product:   g.Product,
 		Version:   g.Version,
 	}
-	return gs.GetFile(group+"/"+name+"/@latest", "application/json")
+	return gs.GetFile(group+"/"+name+"/@v/list", "application/json")
 }

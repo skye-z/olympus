@@ -14,6 +14,25 @@ Olympus 是一个支持多种包管理器, 允许私有化部署的制品代理�
 * NPM Registry
 * Go Registry
 
+## 安装
+
+请复制下方命令到服务器终端中执行, 脚本提供了 Harbor 的安装、卸载与开启自启设置服务
+
+```shell
+bash -c "$(curl -fsSL https://betax.dev/sc/olympus.sh)"
+```
+
+## 控制
+
+```shell
+# 启动 Harbor
+systemctl start olympus
+# 停止 Harbor
+systemctl stop olympus
+# 查看 Harbor 状态与日志
+systemctl status olympus
+```
+
 ## 构建
 
 ```shell

@@ -57,10 +57,7 @@ func (ps ProductService) Search(ctx *gin.Context) {
 func (ps ProductService) GetNumber(ctx *gin.Context) {
 	group := ctx.Query("group")
 	keyword := ctx.Query("keyword")
-	if len(keyword) == 0 {
-		util.ReturnMessage(ctx, false, "搜索关键词不能为空")
-		return
-	} else {
+	if len(keyword) != 0 {
 		keyword = "%" + keyword + "%"
 	}
 	processor, err := strconv.Atoi(ctx.Query("processor"))
@@ -79,10 +76,7 @@ func (ps ProductService) GetNumber(ctx *gin.Context) {
 func (ps ProductService) GetList(ctx *gin.Context) {
 	group := ctx.Query("group")
 	keyword := ctx.Query("keyword")
-	if len(keyword) == 0 {
-		util.ReturnMessage(ctx, false, "搜索关键词不能为空")
-		return
-	} else {
+	if len(keyword) != 0 {
 		keyword = "%" + keyword + "%"
 	}
 	processor, err := strconv.Atoi(ctx.Query("processor"))

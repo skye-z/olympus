@@ -103,6 +103,8 @@ func (model ProductModel) GetNumber(processor int, group, name string) (int64, e
 	var cache *xorm.Session
 	if len(name) > 0 {
 		cache = model.DB.Where("name LIKE ?", name)
+	} else {
+		cache = model.DB.Where("")
 	}
 	if processor > 0 {
 		cache = cache.Where("processor = ?", processor)

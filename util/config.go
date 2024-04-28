@@ -11,6 +11,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"os/exec"
 
 	githubreleases "github.com/skye-z/github-releases"
@@ -20,6 +21,7 @@ import (
 const Version = "1.0.0"
 
 func CheckVersion() {
+	log.Println("[Update] version: " + Version)
 	vg := &githubreleases.Versioning{
 		Author: "skye-z",
 		Store:  "olympus",

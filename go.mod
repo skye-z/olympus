@@ -5,7 +5,7 @@ go 1.21.6
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v5 v5.2.0
-	github.com/skye-z/github-releases v0.0.2
+	github.com/skye-z/github-releases v0.0.3
 	github.com/spf13/viper v1.18.2
 	golang.org/x/oauth2 v0.17.0
 	modernc.org/sqlite v1.29.2

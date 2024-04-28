@@ -25,11 +25,7 @@ func NewProductService(product model.ProductModel, version model.VersionModel) *
 // 获取制品统计
 func (ps ProductService) Stat(ctx *gin.Context) {
 	data := ps.Product.Stat()
-	if data == nil {
-		util.ReturnMessage(ctx, false, "获取制品统计信息失败")
-	} else {
-		util.ReturnData(ctx, true, data)
-	}
+	util.ReturnData(ctx, true, data)
 }
 
 // 搜索制品

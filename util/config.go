@@ -11,9 +11,23 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"os/exec"
 
+	githubreleases "github.com/skye-z/github-releases"
 	"github.com/spf13/viper"
 )
+
+const Version = "1.0.0"
+
+func CheckVersion() {
+	vg := &githubreleases.Versioning{
+		Author: "skye-z",
+		Store:  "olympus",
+		Name:   "olympus",
+		Cmd:    exec.Command("systemctl", "restart", "olympus"),
+	}
+	vg.UpdateVersion(Version)
+}
 
 func InitConfig() {
 	viper.SetConfigName("config")

@@ -12,6 +12,7 @@ var page embed.FS
 
 func main() {
 	util.InitConfig()
+	util.CheckVersion()
 	engine := service.InitDB()
 	go service.InitDBTable(engine)
 	router := service.InitRouter(page)

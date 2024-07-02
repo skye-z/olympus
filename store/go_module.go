@@ -1,10 +1,7 @@
 package store
 
 import (
-	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
@@ -49,7 +46,7 @@ func (gs GoStore) GetFile(path, mimeType string) []byte {
 			return util.ReadFile(filePath)
 		} else {
 			log.Println("[Store] go from online: " + path)
-			content := gs.getRemoteData(path)
+			content := util.GetData(gs.RemoteURL, path, true)
 			if content != nil {
 				util.SaveFile(goRepository+group+"/"+name, version+extend, content)
 			}
@@ -66,35 +63,13 @@ func (gs GoStore) GetFile(path, mimeType string) []byte {
 			return util.ReadFile(filePath)
 		} else {
 			log.Println("[Store] go from online: " + path)
-			content := gs.getRemoteData(path)
+			content := util.GetData(gs.RemoteURL, path, true)
 			if content != nil {
 				util.SaveFile(goRepository+group+"/"+name, "lastest.json", content)
 			}
 			return content
 		}
 	}
-}
-
-// 获取远程数据
-func (gs GoStore) getRemoteData(path string) []byte {
-	resp, err := http.Get(gs.RemoteURL + path)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return nil
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error reading response:", err)
-		return nil
-	}
-
-	return body
 }
 
 // 保存数据

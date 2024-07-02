@@ -8,7 +8,7 @@ import (
 
 type Product struct {
 	Id int64 `json:"id"`
-	// 制品处理器(1Maven、2NPM)
+	// 制品处理器(1Maven、2NPM、3Go、4Docker)
 	Processor int16 `json:"processor"`
 	// 制品组
 	Group string `json:"group"`

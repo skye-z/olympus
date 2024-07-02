@@ -1,10 +1,7 @@
 package store
 
 import (
-	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
@@ -31,35 +28,13 @@ func (ms MavenStore) GetFile(path string) []byte {
 		return util.ReadFile(mavenRepository + path)
 	} else {
 		log.Println("[Store] maven from online: " + path)
-		content := ms.getRemoteData(path)
+		content := util.GetData(ms.RemoteURL, path, true)
 		if content != nil {
 			util.SaveFile(mavenRepository+directory, fileName, content)
 		}
 		go ms.saveData(directory, fileName)
 		return content
 	}
-}
-
-// 获取远程数据
-func (ms MavenStore) getRemoteData(path string) []byte {
-	resp, err := http.Get(ms.RemoteURL + path)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return nil
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error reading response:", err)
-		return nil
-	}
-
-	return body
 }
 
 // 保存数据

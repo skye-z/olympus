@@ -45,7 +45,7 @@ func (ns NpmStore) GetFile(path string) []byte {
 		return util.ReadFile(npmRepository + directory + "/" + fileName)
 	} else {
 		log.Println("[Store] npm from online: " + path)
-		content := ns.getRemoteData(path)
+		content := util.GetData(ns.RemoteURL, path, true)
 		if content == nil {
 			return nil
 		}
@@ -77,28 +77,6 @@ func (ns NpmStore) GetSecurityFile(path, contentType string, body io.ReadCloser)
 	}
 
 	return res
-}
-
-// 获取远程数据
-func (ns NpmStore) getRemoteData(path string) []byte {
-	resp, err := http.Get(ns.RemoteURL + path)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return nil
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error reading response:", err)
-		return nil
-	}
-
-	return body
 }
 
 // 保存数据

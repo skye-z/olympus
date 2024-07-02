@@ -4,3 +4,5 @@ config.ini
 local.store
 /repository
 /out
+*.key
+*.crt

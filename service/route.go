@@ -37,20 +37,20 @@ func addPublicRoute(router *gin.Engine, engine *xorm.Engine) {
 	router.GET("/api/product/maven/:group/:name", ps.GetMavenConfig)
 	router.GET("/api/product/maven/:group/:name/:version", ps.GetMavenConfig)
 	router.GET("/api/product/go/:group/:name", ps.GetGoConfig)
+	router.GET("/api/product/docker/:group/:name", ps.GetGoConfig)
+	router.GET("/api/product/docker/:group/:name/:version", ps.GetGoConfig)
 	// Maven处理路由
 	maven := processor.Maven{
 		Product: product,
 		Version: version,
 	}
-	router.HEAD("/maven/*param", maven.GetFile)
-	router.GET("/maven/*param", maven.GetFile)
+	router.Any("/maven/*param", maven.GetFile)
 	// NPM处理路由
 	npm := processor.Npm{
 		Product: product,
 		Version: version,
 	}
-	router.POST("/npm/*param", npm.GetFile)
-	router.GET("/npm/*param", npm.GetFile)
+	router.Any("/npm/*param", npm.GetFile)
 	// Go处理路由
 	goModule := processor.GoModule{
 		Product: product,

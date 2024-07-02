@@ -29,9 +29,13 @@ type RespStore struct {
 }
 
 // 获取文件
-func (ds DockerStore) GetFile(path, mimeType, method string, body io.ReadCloser, header http.Header) *RespStore {
+func (ds DockerStore) GetFile(path string, header http.Header) *RespStore {
 	var directory string
 	var fileName string
+	var group string
+	var name string
+	var version string
+	save := false
 
 	if path == "v2" || path == "v2/" {
 		directory = dockerRepository
@@ -40,21 +44,22 @@ func (ds DockerStore) GetFile(path, mimeType, method string, body io.ReadCloser,
 		if strings.Contains(path, "/blobs/sha256:") {
 			paths := strings.Split(path, "/blobs/sha256:")
 			params := strings.Split(paths[0], "/")
-			group := params[1]
-			name := params[2]
-			version := params[len(params)-1]
+			group = params[1]
+			name = params[2]
+			version = params[len(params)-1]
 			if version == name {
 				version = "latest"
 			}
-			directory = dockerRepository + group + "/" + name + "/" + version
+			directory = dockerRepository + group + "/" + name
 			fileName = paths[1]
 		} else {
 			params := strings.Split(path, "/")
-			group := params[1]
-			name := params[2]
-			version := params[len(params)-1]
+			group = params[1]
+			name = params[2]
+			version = params[len(params)-1]
 			directory = dockerRepository + group + "/" + name
 			fileName = version + ".json"
+			save = true
 		}
 	}
 
@@ -81,6 +86,11 @@ func (ds DockerStore) GetFile(path, mimeType, method string, body io.ReadCloser,
 
 			rs.Code = resp.StatusCode
 			rs.Header = headerCache
+
+			if resp.StatusCode != 200 {
+				return rs
+			}
+
 			defer resp.Body.Close()
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -95,6 +105,10 @@ func (ds DockerStore) GetFile(path, mimeType, method string, body io.ReadCloser,
 			}
 
 			rs.Data = body
+
+			if save {
+				go ds.saveData(group, name, version)
+			}
 		}
 		return rs
 	}

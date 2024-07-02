@@ -1,9 +1,6 @@
 package processor
 
 import (
-	"mime"
-	"path/filepath"
-
 	"github.com/gin-gonic/gin"
 	"github.com/skye-z/olympus/model"
 	"github.com/skye-z/olympus/store"
@@ -18,9 +15,7 @@ type DockerModule struct {
 
 func (d DockerModule) GetFile(ctx *gin.Context) {
 	param := ctx.Param("param")
-	body := ctx.Request.Body
 	header := ctx.Request.Header
-	method := ctx.Request.Method
 
 	ds := store.DockerStore{
 		RemoteURL: DockerRemoteURL,
@@ -28,10 +23,7 @@ func (d DockerModule) GetFile(ctx *gin.Context) {
 		Version:   d.Version,
 	}
 
-	ext := filepath.Ext(param)
-	mimeType := mime.TypeByExtension(ext)
-
-	resp := ds.GetFile(param[1:], mimeType, method, body, header)
+	resp := ds.GetFile(param[1:], header)
 
 	ctx.Status(resp.Code)
 	for k, v := range resp.Header {
@@ -39,4 +31,23 @@ func (d DockerModule) GetFile(ctx *gin.Context) {
 	}
 	ctx.Writer.Write(resp.Data)
 	ctx.Abort()
+}
+
+func (d DockerModule) GetConfig(ctx *gin.Context, group, name, version string) []byte {
+	ds := store.DockerStore{
+		RemoteURL: DockerRemoteURL,
+		Product:   d.Product,
+		Version:   d.Version,
+	}
+	header := ctx.Request.Header
+	var data *store.RespStore
+	if version == "" {
+		data = ds.GetFile(group+"/"+name+"/latest.json", header)
+	} else {
+		data = ds.GetFile(group+"/"+name+"/"+version+".json", header)
+	}
+	if data.Data == nil {
+		return nil
+	}
+	return data.Data
 }

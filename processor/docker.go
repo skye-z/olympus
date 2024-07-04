@@ -42,9 +42,9 @@ func (d DockerModule) GetConfig(ctx *gin.Context, group, name, version string) [
 	header := ctx.Request.Header
 	var data *store.RespStore
 	if version == "" {
-		data = ds.GetFile(group+"/"+name+"/latest.json", header)
+		data = ds.GetFile("v2/"+group+"/"+name+"/manifests/latest", header)
 	} else {
-		data = ds.GetFile(group+"/"+name+"/"+version+".json", header)
+		data = ds.GetFile("v2/"+group+"/"+name+"/manifests/"+version, header)
 	}
 	if data.Data == nil {
 		return nil

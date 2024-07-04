@@ -41,17 +41,20 @@ func (ds DockerStore) GetFile(path string, header http.Header) *RespStore {
 		directory = dockerRepository
 		fileName = "v2.json"
 	} else {
-		if strings.Contains(path, "/blobs/sha256:") {
-			paths := strings.Split(path, "/blobs/sha256:")
+		if strings.Contains(path, "/sha256:") {
+			var paths []string
+			if strings.Contains(path, "/blobs/sha256:") {
+				paths = strings.Split(path, "/blobs/sha256:")
+			} else {
+				paths = strings.Split(path, "/sha256:")
+			}
 			params := strings.Split(paths[0], "/")
 			group = params[1]
 			name = params[2]
-			version = params[len(params)-1]
-			if version == name {
-				version = "latest"
-			}
+			version = paths[1]
 			directory = dockerRepository + group + "/" + name
 			fileName = paths[1]
+			save = true
 		} else {
 			params := strings.Split(path, "/")
 			group = params[1]
@@ -66,12 +69,12 @@ func (ds DockerStore) GetFile(path string, header http.Header) *RespStore {
 	if util.CheckExist(directory + "/" + fileName) {
 		log.Println("[Store] docker from cache: " + directory + "/" + fileName)
 		rs := &RespStore{}
-		rs.Data = util.ReadFile(directory + "/" + fileName)
 
 		if util.CheckExist(directory + "/" + fileName + ".resp") {
 			cache := util.ReadFile(directory + "/" + fileName + ".resp")
 			json.Unmarshal(cache, &rs)
 		}
+		rs.Data = util.ReadFile(directory + "/" + fileName)
 
 		return rs
 	} else {
@@ -106,7 +109,7 @@ func (ds DockerStore) GetFile(path string, header http.Header) *RespStore {
 
 			rs.Data = body
 
-			if save {
+			if save && version != "" {
 				go ds.saveData(group, name, version)
 			}
 		}

@@ -84,8 +84,11 @@ func (model ProductModel) GetList(processor int, group, name string, page int, n
 	if len(name) > 0 {
 		cache = cache.Where("product.name LIKE ?", name)
 	}
-	if processor > 0 {
+	if processor > 0 && processor != 4 {
 		cache = cache.Where("product.processor = ?", processor)
+	} else {
+		cache = cache.Where("product.processor = ?", 4)
+		cache = cache.Where("LENGTH(version.number) < ?", 64)
 	}
 	if len(group) > 0 {
 		cache = cache.Where("product.group = ?", group)
